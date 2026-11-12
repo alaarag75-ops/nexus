@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS OS — غرفة العمليات الشاملة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #07090e;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 243, 255, 0.08), transparent 35%),
+                radial-gradient(circle at 85% 85%, rgba(188, 19, 254, 0.08), transparent 35%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            min-height: 100vh;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .cyber-panel {
+            background: rgba(15, 20, 32, 0.78);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            transition: all 0.25s ease;
+        }
+        .cyber-panel:hover {
+            border-color: rgba(0, 243, 255, 0.45);
+        }
+        .cyber-btn {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.15), rgba(188, 19, 254, 0.15));
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            color: #00f3ff;
+            transition: all 0.2s ease;
+        }
+        .cyber-btn:hover {
+            background: linear-gradient(135deg, #00f3ff, #bc13fe);
+            color: #07090e;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+        }
+        .cyber-btn:active { transform: scale(0.96); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #07090e; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+
+    <!-- إشعار النسخ والتنبيهات -->
+    <div id="toast" class="fixed bottom-6 left-6 bg-cyan-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-2xl shadow-cyan-500/30 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 text-xs">
+        <i class="fa-solid fa-bolt"></i>
+        <span id="toastText">تم التنفيذ بنجاح!</span>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-5">
+
+        <!-- الشريط العلوي (HUD Header) -->
+        <header class="cyber-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg md:text-xl font-black tracking-wider text-white">NEXUS <span class="text-cyan-400">OS</span></h1>
+                        <span class="text-[10px] mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-md">v4.2 PRO</span>
+                    </div>
+                    <p class="text-xs text-slate-400">غرفة التحكم الشاملة للمطورين وصناع البوتات</p>
+                </div>
+            </div>
+
+            <!-- مؤشرات الأداء الحية -->
+            <div class="flex flex-wrap items-center gap-3 text-xs mono">
+                <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="netStatus" class="text-emerald-400 font-bold">ONLINE</span>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl text-cyan-300">
+                    <i class="fa-solid fa-gauge-high ml-1 text-purple-400"></i> PING: <span id="pingVal">--</span>ms
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl text-amber-300 font-bold" id="liveClock">
+                    00:00:00
+                </div>
+            </div>
+        </header>
+
+        <!-- الشبكة الرئيسية -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+            <!-- العمود الأيمن: ترسانة المطورين (6 أعمدة) -->
+            <div class="lg:col-span-6 space-y-5">
+                
+                <!-- أداة معالجة النصوص والأكواد -->
+                <div class="cyber-panel rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h2 class="text-sm font-bold text-cyan-400 flex items-center gap-2">
+                            <i class="fa-solid fa-microchip"></i> معالج الأكواد والبيانات الفوري
+                        </h2>
+                        <div class="flex gap-2 text-[10px] mono text-slate-400">
+                            <span>حروف: <b id="charCount" class="text-white">0</b></span> |
+                            <span>أسطر: <b id="lineCount" class="text-white">0</b></span>
+                        </div>
+                    </div>
+
+                    <textarea id="devInput" oninput="updateStats()" rows="6" dir="ltr" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 text-xs mono text-cyan-300 focus:outline-none focus:border-cyan-400 transition" placeholder="// الصق هنا كود JSON، نص للتشفير، أو أي بيانات..."></textarea>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="formatJSON()" class="cyber-btn py-2 px-3 rounded-xl">تنسيق JSON</button>
+                        <button onclick="encodeB64()" class="cyber-btn py-2 px-3 rounded-xl">تشفير Base64</button>
+                        <button onclick="decodeB64()" class="cyber-btn py-2 px-3 rounded-xl">فك Base64</button>
+                        <button onclick="copyDevInput()" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 py-2 px-3 rounded-xl transition">
+                            <i class="fa-regular fa-copy ml-1"></i> نسخ الناتج
+                        </button>
+                    </div>
+                </div>
+
+                <!-- مولد التوكنات والباسووردات القوية -->
+                <div class="cyber-panel rounded-2xl p-5 space-y-4">
+                    <h2 class="text-sm font-bold text-purple-400 flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-key"></i> مولد مفاتيح API وباسووردات الحماية
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="generatedKey" readonly dir="ltr" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3 text-xs mono text-amber-300 font-bold" value="اضغط توليد لإنشاء مفتاح مشفر...">
+                        <button onclick="copyText(document.getElementById('generatedKey').value)" class="p-2.5 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 rounded-xl transition text-cyan-400" title="نسخ">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 text-xs">
+                            <label class="text-slate-400">الطول:</label>
+                            <select id="keyLength" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white mono">
+                                <option value="16">16</option>
+                                <option value="32" selected>32</option>
+                                <option value="64">64</option>
+                            </select>
+                        </div>
+                        <button onclick="generateSecretKey()" class="cyber-btn py-2 px-5 rounded-xl text-xs font-bold flex-1">
+                            <i class="fa-solid fa-wand-magic-sparkles ml-1"></i> توليد مفتاح جديد
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- العمود الأوسط: بوابة الوصول السريع (3 أعمدة) -->
+            <div class="lg:col-span-3 space-y-5">
+                <div class="cyber-panel rounded-2xl p-5 space-y-4 h-full flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-rocket"></i> بوابة الوصول السريع
+                            </h2>
+                            <button onclick="toggleAddLink()" class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-1 rounded-lg hover:bg-emerald-500 hover:text-slate-950 transition font-bold">
+                                + إضافة
+                            </button>
+                        </div>
+
+                        <!-- فورم إضافة رابط جديد -->
+                        <div id="addLinkBox" class="hidden bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-2">
+                            <input type="text" id="newLinkName" placeholder="اسم الموقع (مثلاً: لوحة البوت)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <input type="url" id="newLinkUrl" dir="ltr" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-cyan-300 mono">
+                            <button onclick="addCustomLink()" class="w-full bg-emerald-500 text-slate-950 font-bold py-1.5 rounded-lg text-xs">حفظ الرابط</button>
+                        </div>
+
+                        <!-- قائمة الروابط -->
+                        <div id="linksContainer" class="space-y-2 max-h-[380px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800 text-[10px] text-slate-500 text-center">
+                        الروابط المضافة تُحفظ تلقائياً في جهازك
+                    </div>
+                </div>
+            </div>
+
+            <!-- العمود الأيسر: المفكرة السريعة + مؤقت التركيز (3 أعمدة) -->
+            <div class="lg:col-span-3 space-y-5">
+                
+                <!-- مؤقت التركيز (Pomodoro) -->
+                <div class="cyber-panel rounded-2xl p-5 text-center space-y-3">
+                    <h2 class="text-sm font-bold text-amber-400 flex items-center justify-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-stopwatch"></i> مؤقت التركيز والبرمجة
+                    </h2>
+                    <div id="timerDisplay" class="text-4xl font-black mono text-white tracking-widest py-2">25:00</div>
+                    <div class="grid grid-cols-3 gap-2 text-xs font-bold">
+                        <button onclick="startTimer()" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 py-2 rounded-xl transition">ابدأ</button>
+                        <button onclick="pauseTimer()" class="bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500 hover:text-slate-950 py-2 rounded-xl transition">إيقاف</button>
+                        <button onclick="resetTimer()" class="bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500 hover:text-slate-950 py-2 rounded-xl transition">تصفير</button>
+                    </div>
+                </div>
+
+                <!-- مفكرة أوامر Termux والملاحظات -->
+                <div class="cyber-panel rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <h2 class="text-sm font-bold text-pink-400 flex items-center gap-2">
+                            <i class="fa-solid fa-note-sticky"></i> مفكرة الأوامر السريعة
+                        </h2>
+                        <button onclick="copyText(document.getElementById('quickNotes').value)" class="text-xs text-slate-400 hover:text-cyan-400" title="نسخ المفكرة">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                    <textarea id="quickNotes" oninput="saveNotes()" rows="8" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-pink-400" placeholder="اكتب أوامر Termux، ملاحظات السيرفر، أو مهامك هنا... (يتم الحفظ تلقائياً)"></textarea>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. الساعة الحية وحالة الشبكة والـ Ping
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString('en-GB');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function checkPing() {
+            const start = Date.now();
+            fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' })
+                .then(() => {
+                    document.getElementById('pingVal').innerText = Date.now() - start;
+                    document.getElementById('netStatus').innerText = 'ONLINE';
+                    document.getElementById('netStatus').className = 'text-emerald-400 font-bold';
+                })
+                .catch(() => {
+                    document.getElementById('pingVal').innerText = 'OFF';
+                    document.getElementById('netStatus').innerText = 'OFFLINE';
+                    document.getElementById('netStatus').className = 'text-rose-400 font-bold';
+                });
+        }
+        setInterval(checkPing, 5000);
+        checkPing();
+
+        // 2. إشعارات النسخ
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
+        }
+
+        function copyText(text) {
+            if (!text) return showToast('لا يوجد نص لنسخه!');
+            navigator.clipboard.writeText(text).then(() => showToast('تم النسخ إلى الحافظة بنجاح!'));
+        }
+
+        // 3. أدوات المطورين
+        const devInput = document.getElementById('devInput');
+        function updateStats() {
+            const val = devInput.value;
+            document.getElementById('charCount').innerText = val.length;
+            document.getElementById('lineCount').innerText = val ? val.split('\n').length : 0;
+        }
+
+        function formatJSON() {
+            try {
+                const parsed = JSON.parse(devInput.value);
+                devInput.value = JSON.stringify(parsed, null, 4);
+                updateStats();
+                showToast('تم تنسيق كود JSON بنجاح!');
+            } catch (e) {
+                showToast('خطأ: النص ليس كود JSON صحيح!');
+            }
+        }
+
+        function encodeB64() {
+            try {
+                devInput.value = btoa(unescape(encodeURIComponent(devInput.value)));
+                updateStats();
+                showToast('تم التشفير بنظام Base64!');
+            } catch (e) {
+                showToast('حدث خطأ أثناء التشفير!');
+            }
+        }
+
+        function decodeB64() {
+            try {
+                devInput.value = decodeURIComponent(escape(atob(devInput.value)));
+                updateStats();
+                showToast('تم فك التشفير بنجاح!');
+            } catch (e) {
+                showToast('النص المشفر غير صالح!');
+            }
+        }
+
+        function copyDevInput() {
+            copyText(devInput.value);
+        }
+
+        // 4. مولد المفاتيح المشفرة
+        function generateSecretKey() {
+            const len = parseInt(document.getElementById('keyLength').value);
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*_-+=';
+            let result = '';
+            const array = new Uint32Array(len);
+            window.crypto.getRandomValues(array);
+            for (let i = 0; i < len; i++) {
+                result += chars[array[i] % chars.length];
+            }
+            document.getElementById('generatedKey').value = result;
+            showToast('تم توليد مفتاح حماية قوي!');
+        }
+
+        // 5. إدارة الروابط السريعة (مع التخزين المحلي)
+        const defaultLinks = [
+            { name: 'GitHub', url: 'https://github.com', icon: 'fa-brands fa-github' },
+            { name: 'VS Code Web', url: 'https://vscode.dev', icon: 'fa-solid fa-code' },
+            { name: 'ChatGPT', url: 'https://chatgpt.com', icon: 'fa-solid fa-robot' },
+            { name: 'WhatsApp Web', url: 'https://web.whatsapp.com', icon: 'fa-brands fa-whatsapp' },
+            { name: 'Telegram Web', url: 'https://web.telegram.org', icon: 'fa-brands fa-telegram' },
+            { name: 'Vercel Hosting', url: 'https://vercel.com', icon: 'fa-solid fa-server' }
+        ];
+
+        let savedLinks = JSON.parse(localStorage.getItem('nexus_links')) || defaultLinks;
+
+        function renderLinks() {
+            const container = document.getElementById('linksContainer');
+            container.innerHTML = '';
+            savedLinks.forEach((link, index) => {
+                container.innerHTML += `
+                    <div class="p-2.5 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between hover:border-cyan-400/50 transition group">
+                        <a href="${link.url}" target="_blank" class="flex items-center gap-2.5 text-xs font-bold text-slate-200 hover:text-cyan-400 truncate">
+                            <i class="${link.icon || 'fa-solid fa-link'} text-cyan-400"></i>
+                            <span class="truncate">${link.name}</span>
+                        </a>
+                        <div class="flex items-center gap-1">
+                            <button onclick="copyText('${link.url}')" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg" title="نسخ الرابط">
+                                <i class="fa-regular fa-copy text-[11px]"></i>
+                            </button>
+                            <button onclick="deleteLink(${index})" class="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg" title="حذف">
+                                <i class="fa-solid fa-trash text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleAddLink() {
+            document.getElementById('addLinkBox').classList.toggle('hidden');
+        }
+
+        function addCustomLink() {
+            const name = document.getElementById('newLinkName').value.trim();
+            const url = document.getElementById('newLinkUrl').value.trim();
+            if (!name || !url) return showToast('اكتب اسم الموقع والرابط أولاً!');
+            savedLinks.unshift({ name, url, icon: 'fa-solid fa-globe' });
+            localStorage.setItem('nexus_links', JSON.stringify(savedLinks));
+            document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkUrl').value = '';
+            toggleAddLink();
+            renderLinks();
+            showToast('تمت إضافة الرابط وحفظه!');
+        }
+
+        function deleteLink(index) {
+            savedLinks.splice(index, 1);
+            localStorage.setItem('nexus_links', JSON.stringify(savedLinks));
+            renderLinks();
+            showToast('تم حذف الرابط.');
+        }
+
+        // 6. المفكرة السريعة
+        const notesEl = document.getElementById('quickNotes');
+        notesEl.value = localStorage.getItem('nexus_notes') || "pkg update && pkg upgrade\nnpm install\nnode index.js";
+        function saveNotes() {
+            localStorage.setItem('nexus_notes', notesEl.value);
+        }
+
+        // 7. مؤقت التركيز
+        let timeLeft = 25 * 60;
+        let timerInterval = null;
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+            const secs = String(timeLeft % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    pauseTimer();
+                    showToast('انتهى وقت الجلسة! خذ استراحة قصيرة ⚡');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+        }
+
+        // التشغيل الأولي
+        renderLinks();
+    </script>
+</body>
+</html>
